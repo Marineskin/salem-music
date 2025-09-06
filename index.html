@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salem Music</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0d0d0d;
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #1DB954;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 400px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #181818;
+      margin: 6px 0;
+      padding: 12px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    li:hover {
+      background: #282828;
+    }
+    li span {
+      flex: 1;
+    }
+    .play-btn {
+      background: #1DB954;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .play-btn:hover {
+      background: #1ed760;
+    }
+    audio {
+      margin-top: 25px;
+      width: 100%;
+      max-width: 400px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎶 Salem Music</h1>
+  <ul id="lista"></ul>
+  <audio id="player" controls></audio>
+
+  <script>
+    let canciones = [];   // Array con todas las canciones
+    let indiceActual = 0; // Índice de la canción que se está reproduciendo
+    const player = document.getElementById("player");
+    const lista = document.getElementById("lista");
+
+    async function cargarCanciones() {
+      const repoUrl = "https://api.github.com/repos/Marineskin/salem-music/contents/";
+      const res = await fetch(repoUrl);
+      const files = await res.json();
+
+      files.forEach(file => {
+        if (file.name.endsWith(".mp3")) {
+          canciones.push(file.download_url);
+
+          const li = document.createElement("li");
+          const nombre = file.name.replace(".mp3", "");
+          const span = document.createElement("span");
+          span.textContent = nombre;
+
+          const btn = document.createElement("button");
+          btn.textContent = "▶️";
+          btn.className = "play-btn";
+
+          btn.onclick = () => {
+            indiceActual = canciones.indexOf(file.download_url);
+            reproducirCancion();
+          };
+
+          li.appendChild(span);
+          li.appendChild(btn);
+          lista.appendChild(li);
+        }
+      });
+    }
+
+    function reproducirCancion() {
+      if (indiceActual >= canciones.length) {
+        indiceActual = 0; // Reinicia al final de la lista
+      }
+      player.src = canciones[indiceActual];
+      player.play();
+    }
+
+    // Cuando termina la canción, pasa a la siguiente automáticamente
+    player.onended = () => {
+      indiceActual++;
+      if (indiceActual < canciones.length) {
+        reproducirCancion();
+      } else {
+        indiceActual = 0; // Reinicia al final
+      }
+    }
+
+    cargarCanciones();
+  </script>
+</body>
+</html>
